@@ -6,8 +6,8 @@ import pymysql
 from fake_useragent import UserAgent
 from pymysql.cursors import DictCursor
 
-import RequestIherb
-import SQL
+import requestiherb
+import sql
 
 # Import all the Global variables from the configuration file
 with open('conf.json', 'r') as f:
@@ -44,11 +44,11 @@ if __name__ == '__main__':
         limit = args.limit
 
     # Create an object Request_iherb
-    req = RequestIherb.RequestIherb(URL + args.category, limit)
+    req = requestiherb.RequestIherb(URL + args.category, limit)
     print(f"This request contains {min(limit, len(req.url_list))} pages of products")
 
     # Get the html of all the pages obtained with the request
-    all_pages = RequestIherb.get_html(req.url_list, limit)
+    all_pages = requestiherb.get_html(req.url_list, limit)
 
     # Create a list of products from the pages obtained with the request
     for i, page in enumerate(all_pages):
@@ -60,10 +60,10 @@ if __name__ == '__main__':
 
     with connection.cursor() as cursor:
         cursor.execute(f'USE {DB_NAME}')
-        SQL.insert_categories_into_db(req.products, cursor)
-        SQL.insert_brands_into_db(req.products, cursor)
-        SQL.insert_inventory_status_into_db(req.products, cursor)
-        SQL.insert_product_into_db(req.products, cursor)
+        sql.insert_categories_into_db(req.products, cursor)
+        sql.insert_brands_into_db(req.products, cursor)
+        sql.insert_inventory_status_into_db(req.products, cursor)
+        sql.insert_product_into_db(req.products, cursor)
         connection.commit()
 
     print("THE END")

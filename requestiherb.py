@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
-import Product
+import product
 
 with open('conf.json', 'r') as f:
     config = json.load(f)
@@ -96,7 +96,7 @@ class RequestIherb:
             price = item.findNext('meta', attrs={'itemprop': 'price'})['content']
             category = item.findNext('div', attrs={'itemprop': 'category'})['content']
             self.products.append(
-                Product.Product(url=url, name=name, rating=rating, nb_reviews=nb_reviews, image=None,
+                product.Product(url=url, name=name, rating=rating, nb_reviews=nb_reviews, image=None,
                                 product_id=product_id,
                                 part_no=part_no, brand_name=brand_name, brand_id=brand_id,
                                 discount_price=discount_price, out_of_stock=out_of_stock, has_discount=has_discount,
