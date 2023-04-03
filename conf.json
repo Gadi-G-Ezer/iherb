@@ -7,7 +7,7 @@
   "DATABASE": {
     "HOST": "localhost",
     "USER": "root",
-    "PASSWORD": "root",
+    "PASSWORD": "1234567",
     "DB": "employees",
     "CHARSET": "utf8mb4",
     "CURSORCLASS": "pymysql.cursors.DictCursor"
