@@ -9,6 +9,7 @@ from pymysql.cursors import DictCursor
 import requestiherb
 import sql
 
+
 # Import all the Global variables from the configuration file
 with open('conf.json', 'r') as f:
     config = json.load(f)
