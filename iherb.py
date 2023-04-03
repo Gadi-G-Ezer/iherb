@@ -6,7 +6,7 @@ import pymysql
 from fake_useragent import UserAgent
 from pymysql.cursors import DictCursor
 
-import RequestIherb
+import requestiherb
 import SQL
 
 # Import all the Global variables from the configuration file
@@ -44,11 +44,11 @@ if __name__ == '__main__':
         limit = args.limit
 
     # Create an object Request_iherb
-    req = RequestIherb.RequestIherb(URL + args.category, limit)
+    req = requestiherb.RequestIherb(URL + args.category, limit)
     print(f"This request contains {min(limit, len(req.url_list))} pages of products")
 
     # Get the html of all the pages obtained with the request
-    all_pages = RequestIherb.get_html(req.url_list, limit)
+    all_pages = requestiherb.get_html(req.url_list, limit)
 
     # Create a list of products from the pages obtained with the request
     for i, page in enumerate(all_pages):
