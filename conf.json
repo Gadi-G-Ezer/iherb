@@ -1,0 +1,20 @@
+{
+  "URL" : "https://www.iherb.com/c/",
+  "PARSER_TYPE" : "html.parser",
+  "BROWSERS": ["edge", "chrome", "firefox"],
+  "LOGGING_LEVEL" : "INFO",
+  "RESULTS_PER_PAGE" : 48,
+  "DATABASE": {
+    "HOST": "localhost",
+    "USER": "root",
+    "PASSWORD": "root",
+    "DB": "employees",
+    "CHARSET": "utf8mb4",
+    "CURSORCLASS": "pymysql.cursors.DictCursor"
+  },
+  "DB_NAME" : "iherb",
+  "DEFAULT_LIMIT" : 3,
+  "CATEGORIES" : ["sports","supplements","bath-personal-care","beauty","grocery","healthy-home","baby-kids","pets"],
+  "LOG_FILENAME": "iherb-scraping.log",
+  "LOG_FORMAT": "%(asctime)s:%(levelname)s:%(message)s"
+}
