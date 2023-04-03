@@ -118,5 +118,3 @@ def insert_product_into_db(products, curs):
                 logging.info(
                     f"""FAIL : INSERT INTO `product_category` (`product_id`, `category_id`) VALUES ({product_id},
                              {category_id});  CAUSE = {e}""")
-
-    return
