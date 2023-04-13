@@ -58,6 +58,8 @@ class RequestIherb:
 
     def _get_nb_results(self):
         span_tag = None
+        # This 'while' has been added to deal with A/B testing that have been implemented in the website after the
+        # begining of the project. It helps us to request the website while we are not on the right version of the page
         while span_tag is None:
             html = self._get_page_content()
             soup = BeautifulSoup(html, PARSER_TYPE)
@@ -141,12 +143,17 @@ def get_html(urls, limit):
     list of str
         The content of the responses, in the same order as the input URLs.
     """
-    all_requests = [grequests.get(url) for url in urls]
-    # Send the requests and process the responses
     responses = []
-    for index, request in enumerate(all_requests):
+    for index, url in enumerate(urls):
         if index < limit:
+            request = grequests.get(url)
             response = request.send()
+            # This 'while' has been added to deal with A/B testing that have been implemented in the website after the
+            # begining of the project. It helps us to request the website while we are not on the right version of the
+            # page
+            while response.response.url.endswith("/store"):
+                request = grequests.get(url)
+                response = request.send()
             responses.append(response)
             print(f"Got response from {response.url}")
             logging.info(f"Got response from {response.url}")
