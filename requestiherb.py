@@ -61,9 +61,15 @@ class RequestIherb:
         soup = BeautifulSoup(html, PARSER_TYPE)
         span_tag = soup.find('span', {'class': 'sub-header-title display-items'})
         text = span_tag.text
-        # The total number of products of the category is stored in "text" between the char 21 and 25
-        nb_result = int(text[21:25])
-        return nb_result
+        # We store in 'numbers' all the numbers found in the span that contains the number of products of the request
+        numbers = re.findall(r'\d+(?:\.\d+)?', text)
+        num_result = 0
+        # 1 correspond to page 1 and 48 correspond to the number of results par page, so we exclude it
+        for number in numbers:
+            if int(number) not in (1, 48):
+                num_result = int(number)
+                break
+        return num_result
 
     def _get_url_list(self):
         nb_pages = int(self.nb_result / RESULTS_PER_PAGE) + 2
