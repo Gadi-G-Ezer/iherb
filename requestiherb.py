@@ -57,9 +57,11 @@ class RequestIherb:
         self.limit = limit
 
     def _get_nb_results(self):
-        html = self._get_page_content()
-        soup = BeautifulSoup(html, PARSER_TYPE)
-        span_tag = soup.find('span', {'class': 'sub-header-title display-items'})
+        span_tag = None
+        while span_tag is None:
+            html = self._get_page_content()
+            soup = BeautifulSoup(html, PARSER_TYPE)
+            span_tag = soup.find('span', {'class': 'sub-header-title display-items'})
         text = span_tag.text
         # We store in 'numbers' all the numbers found in the span that contains the number of products of the request
         numbers = re.findall(r'\d+(?:\.\d+)?', text)
@@ -120,10 +122,6 @@ class RequestIherb:
         """
         headers = {"User-Agent": UA.random}
         response = requests.get(self.url, headers=headers)
-        if response.ok:
-            print(f'We could access the URL {self.url}')
-        else:
-            print(f'We could access the URL but we did not get the content of this URL {self.url}')
         html = response.content
         return html
 
