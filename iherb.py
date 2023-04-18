@@ -8,7 +8,7 @@ from pymysql.cursors import DictCursor
 
 import requestiherb
 import sql
-
+import twitter_api
 
 # Import all the Global variables from the configuration file
 with open('conf.json', 'r') as f:
@@ -66,5 +66,7 @@ if __name__ == '__main__':
         sql.insert_inventory_status_into_db(req.products, cursor)
         sql.insert_product_into_db(req.products, cursor)
         connection.commit()
+
+    print(twitter_api.get_number_of_tweets())
 
     print("THE END")
