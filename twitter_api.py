@@ -1,5 +1,6 @@
 import os
 
+import grequests
 import requests
 from requests_oauthlib import OAuth1
 
@@ -31,6 +32,25 @@ def get_number_of_tweets(query = "California Gold Nutrition"):
     # If no errors get the response and count the number of tweets containing the query
     json_response = response.json()
     return len(json_response["statuses"])
+
+
+def get_number_of_tweets_async(query="California Gold Nutrition"):
+    params = {"q": query, "count": 150, "result_type": "recent"}
+
+    # Create the grequests request
+    request = grequests.get(API_URL, params=params, auth=get_oauth1_authentication())
+
+    # Send the request asynchronously
+    response = grequests.map([request])[0]
+
+    # Check for errors in the response
+    if response.status_code != 200:
+        raise ValueError("Failed to get tweets (HTTP status code {})".format(response.status_code))
+
+    # If no errors, get the response and count the number of tweets containing the query
+    json_response = response.json()
+    return len(json_response["statuses"])
+
 
 if __name__ == "__main__":
     print(get_number_of_tweets(query = "California Gold Nutrition"))

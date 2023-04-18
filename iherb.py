@@ -33,6 +33,7 @@ DB_NAME = config["DB_NAME"]
 CATEGORIES = config["CATEGORIES"]
 DEFAULT_LIMIT = config["DEFAULT_LIMIT"]
 
+
 def get_parameters_for_crapping():
     """
     Retrieve parameters for running a web scraping script.
@@ -72,13 +73,17 @@ def get_parameters_for_crapping():
         lim = arguments.limit
     return arguments, lim
 
+
 if __name__ == '__main__':
     args, limit = get_parameters_for_crapping()
+
     # Create an object Request_iherb
     req = requestiherb.RequestIherb(URL + args.category, limit)
     print(f"This request contains {min(limit, len(req.url_list))} pages of products")
+
     # Get the html of all the pages obtained with the request
     all_pages = requestiherb.get_html(req.url_list, limit)
+
     # Create a list of products from the pages obtained with the request
     for i, page in enumerate(all_pages):
         print(f"process the page : {i}")
@@ -95,6 +100,6 @@ if __name__ == '__main__':
         sql.insert_product_into_db(req.products, cursor)
         connection.commit()
 
-    print(twitter_api.get_number_of_tweets())
+    twitter_api.get_number_of_tweets_async(query="California Gold Nutrition")
 
     print("THE END")
