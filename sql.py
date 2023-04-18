@@ -20,7 +20,7 @@ SELECT_CATEGORY_ID = "SELECT id FROM category WHERE category.category='{category
 SELECT_PRODUCT_ID_USING_IHERB_ID = "SELECT id FROM product WHERE product.iherb_product_id='{product_id}'"
 INSERT_PRODUCT_CATEGORY = "INSERT INTO `product_category` (`product_id`, `category_id`) VALUES ({product_id}," \
                           "{category_id})"
-
+UPDATE_BRAND_TWEETS_QTY = "UPDATE brands SET number_of_tweets ={tweets} WHERE id={brand_id};"
 
 def insert_categories_into_db(products, curs):
     """
@@ -166,3 +166,66 @@ def populate_product_category(prod, curs):
         logging.info(
             f"""FAIL : {INSERT_PRODUCT_CATEGORY.format(product_id=product_id, category_id=category_id)}
                         CAUSE = {e}""")
+
+
+def get_brands_names(products, curs):
+    """
+    Returns a list of dictionaries representing the brands of the given products.
+
+    Args:
+        products (List[Product]): A list of Product objects with brand names.
+        curs (Cursor): A database cursor used to execute SQL queries.
+
+    Returns:
+        List[Dict[str, Union[int, str]]]: A list of dictionaries with the keys 'id' and 'name',
+        representing the id and name of each brand. The list is ordered according to the order
+        of the given products.
+
+    Raises:
+        DatabaseError: If there is an error executing the SQL query.
+
+    Example:
+        products = [Product(brand_name='Apple'), Product(brand_name='Samsung')]
+        curs = conn.cursor()
+        brands = get_brands_names(products, curs)
+        # brands == [{'id': 1, 'name': 'Apple'}, {'id': 2, 'name': 'Samsung'}]
+    """
+    brands = []
+    for product in products:
+        try:
+            curs.execute(SELECT_BRAND_WITH_NAME.format(brand_name=product.brand_name))
+        except BaseException as error:
+            logging.error(f"Error: {error}")
+        brands.append({'id': curs.fetchall()[0], 'name': product.brand_name}
+    return brands
+
+
+def update_number_tweets(brands_dict, curs):
+    """
+    Updates the number of tweets for each brand in the database.
+
+    Args:
+        brands_dict (Dict[int, int]): A dictionary where the keys are brand ids and the values are
+        the number of tweets for each brand.
+        curs (Cursor): A database cursor used to execute SQL queries.
+
+    Returns:
+        None
+
+    Raises:
+        DatabaseError: If there is an error executing the SQL query.
+
+    Example:
+        brands_dict = {1: 100, 2: 200, 3: 300}
+        curs = conn.cursor()
+        update_number_tweets(brands_dict, curs)
+    """
+    for id_, tweets_qty in brands_dict.items():
+        try:
+            curs.execute(UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_))
+        except pymysql.err.Error as e:
+            logging.info(
+                f"""FAIL : {UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_)} CAUSE : {e}""")
+            print(f"UPDATE FAILED for id: {id_}, number of tweets: {tweets_qty} !!!")
+
+
