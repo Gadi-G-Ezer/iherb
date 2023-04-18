@@ -98,8 +98,7 @@ if __name__ == '__main__':
         sql.insert_brands_into_db(req.products, cursor)
         sql.insert_inventory_status_into_db(req.products, cursor)
         sql.insert_product_into_db(req.products, cursor)
+        brands = sql.get_brands_names(req.products, cursor)
         connection.commit()
-
-    twitter_api.get_number_of_tweets_async(query="California Gold Nutrition")
 
     print("THE END")

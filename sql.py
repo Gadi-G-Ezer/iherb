@@ -189,6 +189,7 @@ def get_brands_names(products, curs):
         curs = conn.cursor()
         brands = get_brands_names(products, curs)
         # brands == [{'id': 1, 'name': 'Apple'}, {'id': 2, 'name': 'Samsung'}]
+        
     """
     brand_list = list(set([product.brand_name for product in products]))
     brands = []
