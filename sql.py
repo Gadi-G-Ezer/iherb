@@ -190,13 +190,15 @@ def get_brands_names(products, curs):
         brands = get_brands_names(products, curs)
         # brands == [{'id': 1, 'name': 'Apple'}, {'id': 2, 'name': 'Samsung'}]
     """
+    brand_list = list(set([product.brand_name for product in products]))
     brands = []
-    for product in products:
+    for brand in brand_list:
         try:
-            curs.execute(SELECT_BRAND_WITH_NAME.format(brand_name=product.brand_name))
+            curs.execute(SELECT_BRAND_WITH_NAME.format(brand_name='"'+brand+'"'))
         except BaseException as error:
+            print("ERROR : ",error)
             logging.error(f"Error: {error}")
-        brands.append({'id': curs.fetchall()[0], 'name': product.brand_name}
+        brands.append({'id': curs.fetchall()[0]['id'], 'name': brand})
     return brands
 
 
