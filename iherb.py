@@ -33,6 +33,7 @@ DB_NAME = config["DB_NAME"]
 CATEGORIES = config["CATEGORIES"]
 DEFAULT_LIMIT = config["DEFAULT_LIMIT"]
 
+
 def get_parameters_for_crapping():
     """
     Retrieve parameters for running a web scraping script.
@@ -72,6 +73,7 @@ def get_parameters_for_crapping():
         lim = arguments.limit
     return arguments, lim
 
+
 if __name__ == '__main__':
     args, limit = get_parameters_for_crapping()
     # Create an object Request_iherb
@@ -93,8 +95,9 @@ if __name__ == '__main__':
         sql.insert_brands_into_db(req.products, cursor)
         sql.insert_inventory_status_into_db(req.products, cursor)
         sql.insert_product_into_db(req.products, cursor)
+        brands = sql.get_brands_names(req.products, cursor)
         connection.commit()
 
-    print(twitter_api.get_number_of_tweets())
+    # print(twitter_api.get_number_of_tweets())
 
     print("THE END")
