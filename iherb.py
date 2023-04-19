@@ -50,8 +50,10 @@ def get_parameters_for_crapping():
         No exception is raised.
 
     Description:
-        This function uses argparse to retrieve the command-line parameters required for running a web scraping script. The required parameters are:
-        - The category for which to retrieve the scraping results, which must be chosen from a predefined list of categories.
+        This function uses argparse to retrieve the command-line parameters required for running a web scraping script.
+        The required parameters are:
+        - The category for which to retrieve the scraping results, which must be chosen from a predefined list of
+        categories.
         - (Optional) The maximum number of results to retrieve, which must be a positive integer.
 
         If the user does not specify the limit parameter, the default limit will be used.
@@ -99,6 +101,10 @@ if __name__ == '__main__':
         sql.insert_inventory_status_into_db(req.products, cursor)
         sql.insert_product_into_db(req.products, cursor)
         brands = sql.get_brands_names(req.products, cursor)
+        for index, brand in enumerate(brands):
+            brands[index]['num_tweets'] = twitter_api.get_number_of_tweets_async(query=brands[index]["name"])
+            print("Getting tweets request number ", index, " out of ", len(brands)-1)
+        # sql.update_number_tweets(brands, cursor)
         connection.commit()
 
     print("THE END")
