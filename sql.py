@@ -22,6 +22,7 @@ INSERT_PRODUCT_CATEGORY = "INSERT INTO `product_category` (`product_id`, `catego
                           "{category_id})"
 UPDATE_BRAND_TWEETS_QTY = "UPDATE brands SET number_of_tweets ={tweets} WHERE id={brand_id};"
 
+
 def insert_categories_into_db(products, curs):
     """
     inserts the categories of the products into the DB
@@ -168,6 +169,41 @@ def populate_product_category(prod, curs):
                         CAUSE = {e}""")
 
 
+# def get_brands_names(products, curs):
+#     """
+#     Returns a list of dictionaries representing the brands of the given products.
+#
+#     Args:
+#         products (List[Product]): A list of Product objects with brand names.
+#         curs (Cursor): A database cursor used to execute SQL queries.
+#
+#     Returns:
+#         List[Dict[str, Union[int, str]]]: A list of dictionaries with the keys 'id' and 'name',
+#         representing the id and name of each brand. The list is ordered according to the order
+#         of the given products.
+#
+#     Raises:
+#         DatabaseError: If there is an error executing the SQL query.
+#
+#     Example:
+#         products = [Product(brand_name='Apple'), Product(brand_name='Samsung')]
+#         curs = conn.cursor()
+#         brands = get_brands_names(products, curs)
+#         # brands == [{'id': 1, 'name': 'Apple'}, {'id': 2, 'name': 'Samsung'}]
+#
+#     """
+#     brand_list = list(set([product.brand_name for product in products]))
+#     brands = []
+#     for brand in brand_list:
+#         try:
+#             curs.execute(SELECT_BRAND_WITH_NAME.format(brand_name='"' + brand + '"'))
+#         except BaseException as error:
+#             print("ERROR : ", error)
+#             logging.error(f"Error: {error}")
+#         brands.append({'id': curs.fetchall()[0]['id'], 'name': brand})
+#     return brands
+
+
 def get_brands_names(products, curs):
     """
     Returns a list of dictionaries representing the brands of the given products.
@@ -192,14 +228,16 @@ def get_brands_names(products, curs):
 
     """
     brand_list = list(set([product.brand_name for product in products]))
-    brands = []
+    brands = ''
     for brand in brand_list:
-        try:
-            curs.execute(SELECT_BRAND_WITH_NAME.format(brand_name='"'+brand+'"'))
-        except BaseException as error:
-            print("ERROR : ",error)
-            logging.error(f"Error: {error}")
-        brands.append({'id': curs.fetchall()[0]['id'], 'name': brand})
+        brands = brands + '","' + brand
+    brands = '"'+brands[3:]+'"'
+    try:
+        curs.execute(f"SELECT * from brands where name in ({brands}); ")
+    except BaseException as error:
+        print("ERROR : ", error)
+        logging.error(f"Error: {error}")
+    brands = curs.fetchall()
     return brands
 
 
@@ -230,5 +268,3 @@ def update_number_tweets(brands_dict, curs):
             logging.info(
                 f"""FAIL : {UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_)} CAUSE : {e}""")
             print(f"UPDATE FAILED for id: {id_}, number of tweets: {tweets_qty} !!!")
-
-

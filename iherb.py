@@ -50,8 +50,10 @@ def get_parameters_for_crapping():
         No exception is raised.
 
     Description:
-        This function uses argparse to retrieve the command-line parameters required for running a web scraping script. The required parameters are:
-        - The category for which to retrieve the scraping results, which must be chosen from a predefined list of categories.
+        This function uses argparse to retrieve the command-line parameters required for running a web scraping script.
+        The required parameters are:
+        - The category for which to retrieve the scraping results, which must be chosen from a predefined list of
+        categories.
         - (Optional) The maximum number of results to retrieve, which must be a positive integer.
 
         If the user does not specify the limit parameter, the default limit will be used.
@@ -76,11 +78,14 @@ def get_parameters_for_crapping():
 
 if __name__ == '__main__':
     args, limit = get_parameters_for_crapping()
+
     # Create an object Request_iherb
     req = requestiherb.RequestIherb(URL + args.category, limit)
     print(f"This request contains {min(limit, len(req.url_list))} pages of products")
+
     # Get the html of all the pages obtained with the request
     all_pages = requestiherb.get_html(req.url_list, limit)
+
     # Create a list of products from the pages obtained with the request
     for i, page in enumerate(all_pages):
         print(f"process the page : {i}")
@@ -96,8 +101,10 @@ if __name__ == '__main__':
         sql.insert_inventory_status_into_db(req.products, cursor)
         sql.insert_product_into_db(req.products, cursor)
         brands = sql.get_brands_names(req.products, cursor)
+        for index, brand in enumerate(brands):
+            brands[index]['num_tweets'] = twitter_api.get_number_of_tweets_async(query=brands[index]["name"])
+            print("Getting tweets request number ", index, " out of ", len(brands)-1)
+        # sql.update_number_tweets(brands, cursor)
         connection.commit()
-
-    # print(twitter_api.get_number_of_tweets())
 
     print("THE END")
