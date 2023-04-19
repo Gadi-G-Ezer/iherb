@@ -227,11 +227,9 @@ def get_brands_names(products, curs):
         # brands == [{'id': 1, 'name': 'Apple'}, {'id': 2, 'name': 'Samsung'}]
 
     """
-    brand_list = list(set([product.brand_name for product in products]))
-    brands = ''
-    for brand in brand_list:
-        brands = brands + '","' + brand
-    brands = '"'+brands[3:]+'"'
+    brands_list = list(set([f'"{str(product.brand_name)}"' for product in products]))
+    brands = (",").join(brands_list)
+
     try:
         curs.execute(f"SELECT * from brands where name in ({brands}); ")
     except BaseException as error:
@@ -241,27 +239,28 @@ def get_brands_names(products, curs):
     return brands
 
 
-def update_number_tweets(brands_dict, curs):
+def update_number_tweets(brands, curs):
     """
-    Updates the number of tweets for each brand in the database.
+    Update the number of tweets for each brand in the database.
 
     Args:
-        brands_dict (Dict[int, int]): A dictionary where the keys are brand ids and the values are
-        the number of tweets for each brand.
-        curs (Cursor): A database cursor used to execute SQL queries.
+        brands (list): A list of dictionaries, where each dictionary represents a brand and contains the keys 'id'
+            and 'tweets_qty'.
+        curs: The cursor object used to execute the SQL queries.
 
     Returns:
         None
 
     Raises:
-        DatabaseError: If there is an error executing the SQL query.
+        pymysql.err.Error: If an error occurs while executing the SQL query.
 
-    Example:
-        brands_dict = {1: 100, 2: 200, 3: 300}
+    Example usage:
+        brands = [{'id': 1, 'tweets_qty': 100}, {'id': 2, 'tweets_qty': 200}]
         curs = conn.cursor()
-        update_number_tweets(brands_dict, curs)
+        update_number_tweets(brands, curs)
     """
-    for id_, tweets_qty in brands_dict.items():
+    for brand in brands:
+        id_, tweets_qty = brand.values()
         try:
             curs.execute(UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_))
         except pymysql.err.Error as e:
