@@ -1,7 +1,7 @@
 import os
 
 import requests
-from requests_oauthlib import OAuth1
+# from requests_oauthlib import OAuth1
 
 # These settings are taken from Environment variables
 CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
