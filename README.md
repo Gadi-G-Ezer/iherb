@@ -1,8 +1,10 @@
 # iHerb Web Scraper
 
 ## Overview
-The iHerb Web Scraper is a Python program that extracts product information from the iHerb website. This scraper uses the requests, grequests, and BeautifulSoup libraries to extract data from the website, and then stores the extracted information in a MySQL database.
-We will use this information for a data mining project to make statistics on it.
+The iHerb Web Scraper is a Python program that extracts product information from the iHerb website. 
+This scraper uses the requests, grequests, and BeautifulSoup libraries to extract data from the website, and then stores the extracted information in a MySQL database.
+It also uses Twitter API to get the number of tweets we have for the product brand.
+We will use this information for a data mining project to make statistics on it. 
 
 ## Features
 The iHerb Web Scraper is capable of the following features:
@@ -22,6 +24,7 @@ The iHerb Web Scraper is capable of the following features:
   - Currency
   - Discount price
   - Out of stock (boolean)
+- Extracting the number of tweets of the product's brand using Twitter API V1.1
 
 ## Usage
 To use the iHerb Web Scraper, you need to call the program with the following arguments:
@@ -63,6 +66,8 @@ To use the iHerb Web Scraper, you will need to install the following Python libr
 - grequest
 - request
 - bs4
+- requests_oauthlib
+- os
 
 You will also need to set up a MySQL database and configure the database settings in the `conf.json` file.
 
@@ -82,11 +87,11 @@ Below is an overview of each table, its columns, and their data types.
 
 ### Table: `brands`
 
-| Column | Data Type    | Description        |
-|--------|--------------|--------------------|
-| id     | int          | Brand's unique ID. |
-| name   | varchar(255) | Brand's name.      |
-
+| Column           | Data Type    | Description                           |
+|------------------|--------------|---------------------------------------|
+| id               | int          | Brand's unique ID.                    |
+| name             | varchar(255) | Brand's name.                         |
+| number_of_tweets | int          | Number of recent tweets for the brand |
 ### Table: `category`
 
 | Column      | Data Type    | Description                          |
