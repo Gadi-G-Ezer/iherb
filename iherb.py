@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import time
 
 import pymysql
 from fake_useragent import UserAgent
@@ -32,9 +33,10 @@ connection = pymysql.connect(
 DB_NAME = config["DB_NAME"]
 CATEGORIES = config["CATEGORIES"]
 DEFAULT_LIMIT = config["DEFAULT_LIMIT"]
+TIME_SLEEP = config["TIME_SLEEP"]
 
 
-def get_parameters_for_crapping():
+def get_parameters_for_scrapping():
     """
     Retrieve parameters for running a web scraping script.
 
@@ -76,6 +78,26 @@ def get_parameters_for_crapping():
     return arguments, lim
 
 
+def pause_program(pause_time=TIME_SLEEP):
+    """
+    Pauses the program for a specified duration.
+
+    This function is useful for waiting before sending more requests to an API,
+    such as the Twitter API, to avoid hitting rate limits. It prints a message
+    before and after the pause.
+
+    Args:
+        pause_time (int, optional): The duration of the pause in seconds. Default value is TIME_SLEEP.
+
+    Returns:
+        None
+    """
+    print(f"We reached the maximum number of requests.")
+    print(f"Pausing for {TIME_SLEEP} seconds before to continue the requests on Twitter API...")
+    time.sleep(pause_time)
+    print("Done pausing!")
+
+
 def run_requests_on_db_and_api():
     """
     This function inserts product data into the database and retrieves the number of tweets
@@ -100,13 +122,16 @@ def run_requests_on_db_and_api():
         sql.insert_product_into_db(req.products, cursor)
         brands = sql.get_brands_names(req.products, cursor)
         for index, brand in enumerate(brands):
-            try:
-                brands[index]['number_of_tweets'] = twitter_api.get_number_of_tweets_async(query=brands[index]["name"])
-                print("Getting tweets request number ", index, " out of ", len(brands) - 1)
-            except ValueError as err:
-                logging.info(err)
-                print("We reached the maximum number of requests")
-                break
+            continue_requests = True
+            while continue_requests:
+                try:
+                    brands[index]['number_of_tweets'] = twitter_api.get_number_of_tweets_async(
+                        query=brands[index]["name"])
+                    print("Getting tweets request number ", index, " out of ", len(brands) - 1)
+                    continue_requests = False
+                except ValueError as err:
+                    logging.info(err)
+                    pause_program(pause_time=TIME_SLEEP)
         sql.update_number_tweets(brands, cursor)
         connection.commit()
 
@@ -134,7 +159,7 @@ def create_product_list(page_list):
 
 
 if __name__ == '__main__':
-    args, limit = get_parameters_for_crapping()
+    args, limit = get_parameters_for_scrapping()
 
     # Create an object Request_iherb
     req = requestiherb.RequestIherb(URL + args.category, limit)

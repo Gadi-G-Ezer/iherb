@@ -8,13 +8,24 @@
     "HOST": "localhost",
     "USER": "root",
     "PASSWORD": "root",
-    "DB": "employees",
+    "DB": "iherb",
     "CHARSET": "utf8mb4",
     "CURSORCLASS": "pymysql.cursors.DictCursor"
   },
+    "TWITTER_REQUEST_PARAMETERS": {
+    "LATITUDE": "32.109333",
+    "LONGITUDE": "34.855499",
+    "RESULT_TYPE": "recent",
+    "RADIUS": "500km",
+    "MAX_TWEETS" : 100,
+    "REQUEST_ACCEPTED_CODE" : 200
+
+  },
+  "TIME_SLEEP": 900,
   "DB_NAME" : "iherb",
   "DEFAULT_LIMIT" : 3,
   "CATEGORIES" : ["sports","supplements","bath-personal-care","beauty","grocery","healthy-home","baby-kids","pets"],
   "LOG_FILENAME": "iherb-scraping.log",
-  "LOG_FORMAT": "%(asctime)s:%(levelname)s:%(message)s"
+  "LOG_FORMAT": "%(asctime)s:%(levelname)s:%(message)s",
+  "API_URL" : "https://api.twitter.com/1.1/search/tweets.json"
 }

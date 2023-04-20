@@ -1,8 +1,13 @@
+import json
 import os
+import time
 
 import grequests
-import requests
 from requests_oauthlib import OAuth1
+
+# Import all the Global variables from the configuration file
+with open('conf.json', 'r') as f:
+    config = json.load(f)
 
 # These settings are taken from Environment variables
 CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
@@ -10,6 +15,7 @@ CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
 ACCESS_TOKEN = os.environ.get('TWITTER_ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
 API_URL = 'https://api.twitter.com/1.1/search/tweets.json'
+REQUEST_ACCEPTED_CODE = config["TWITTER_REQUEST_PARAMETERS"]["REQUEST_ACCEPTED_CODE"]
 
 
 def get_oauth1_authentication():
@@ -27,31 +33,39 @@ def get_oauth1_authentication():
     return oauth
 
 
-def get_number_of_tweets(query):
+def run_request(query, max_id):
     """
-    Get the number of tweets containing the given query using the Twitter API.
+    Sends a request to the Twitter API with the specified query and max_id.
+
+    This function creates and sends an asynchronous request to the Twitter API
+    using the grequests library. It includes search parameters such as the query,
+    count, result type, and geocode, and it applies the OAuth1 authentication for
+    the API.
 
     Args:
-        query (str, optional): The search query for tweets. Defaults to "California Gold Nutrition".
+        query (str): The search query for the Twitter API request.
+        max_id (int or None): The maximum tweet ID to fetch in the request. Set to None if not used.
 
     Returns:
-        int: The number of tweets containing the search query.
-
-    Raises:
-        ValueError: If there's an error in the API response.
+        response_: The response object from the grequests request.
     """
-    params = {"q": query, "count": 150, "result_type": "recent"}
-    # Send the request to the search endpoint
-    response = requests.get(API_URL, params=params, auth=get_oauth1_authentication())
+    params = {
+        "q": query,
+        "count": config["TWITTER_REQUEST_PARAMETERS"]["MAX_TWEETS"],
+        "result_type": config["TWITTER_REQUEST_PARAMETERS"]["RESULT_TYPE"],
+        "geocode": f'{config["TWITTER_REQUEST_PARAMETERS"]["LATITUDE"]},'
+                   f'{config["TWITTER_REQUEST_PARAMETERS"]["LONGITUDE"]},'
+                   f'{config["TWITTER_REQUEST_PARAMETERS"]["RADIUS"]}'
+    }
+    if max_id:
+        params["max_id"] = max_id
 
-    # Check for errors in the response
-    if response.status_code != 200:
-        raise ValueError("Failed to get tweets (HTTP status code {})".format(response.status_code))
+    # Create the grequests request
+    request = grequests.get(API_URL, params=params, auth=get_oauth1_authentication())
 
-    # If no errors get the response and count the number of tweets containing the query
-    json_response = response.json()
-    return len(json_response["statuses"])
-
+    # Send the request asynchronously
+    response_ = grequests.map([request])[0]
+    return response_
 
 
 def get_number_of_tweets_async(query):
@@ -67,31 +81,30 @@ def get_number_of_tweets_async(query):
     Raises:
         ValueError: If there's an error in the API response.
     """
-    latitude = 32.109333
-    longitude = 34.855499
-    radius = "150km"
+    tweet_count = 0
+    max_id = None
+    while True:
+        # Send the request asynchronously
+        response = run_request(query, max_id)
 
-    params = {
-        "q": query,
-        "count": 150,
-        "result_type": "recent",
-        "geocode": f"{latitude},{longitude},{radius}"
-    }
+        # Check for errors in the response
+        if response.status_code != REQUEST_ACCEPTED_CODE:
+            raise ValueError("Failed to get tweets (HTTP status code {})".format(response.status_code))
 
-    # Create the grequests request
-    request = grequests.get(API_URL, params=params, auth=get_oauth1_authentication())
+        # If no errors, get the response and count the number of tweets containing the query
+        json_response = response.json()
+        tweet_count += len(json_response["statuses"])
 
-    # Send the request asynchronously
-    response = grequests.map([request])[0]
+        # Check if there are more results
+        metadata = json_response.get("search_metadata")
+        next_results = metadata.get("next_results") if metadata else None
+        if not next_results:
+            break
+        max_id = int(next_results.split('max_id=')[1].split('&')[0]) - 1  # Extract the max_id from the next_results par
+        time.sleep(1)  # Add a delay to avoid hitting rate limits
 
-    # Check for errors in the response
-    if response.status_code != 200:
-        raise ValueError("Failed to get tweets (HTTP status code {})".format(response.status_code))
-
-    # If no errors, get the response and count the number of tweets containing the query
-    json_response = response.json()
-    return len(json_response["statuses"])
+    return tweet_count
 
 
 if __name__ == "__main__":
-    print(get_number_of_tweets(query="California Gold Nutrition"))
+    print(get_number_of_tweets_async(query="California Gold Nutrition"))
