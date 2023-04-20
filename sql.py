@@ -48,9 +48,9 @@ def connect_to_pymysql(func):
         {
             "DATABASE": {
                 "HOST": "localhost",
-                "USER": "myuser",
+                "USER": "my_user",
                 "PASSWORD": "mypassword",
-                "DB": "mydatabase",
+                "DB": "my_database",
                 "CHARSET": "utf8mb4"
             }
         }
@@ -84,11 +84,8 @@ def connect_to_pymysql(func):
         curs = connection.cursor()
         # pass the cursor as a parameter to the decorated function
         result = func(curs, *args, **kwargs)
-        try:
-            # Commit changes to the database in case of sql queries such as: INSERT, UPDATE, or DELETE.
-            connection.commit()
-        except BaseException:
-            pass
+        # Commit changes to the database in case of sql queries such as: INSERT, UPDATE, or DELETE.
+        connection.commit()
         # close the cursor and connection after the function call is completed
         curs.close()
         connection.close()
@@ -189,10 +186,11 @@ def create_new_product(curs, prod):
         brand_id = result[0]['id']
         prod_name = prod.name.replace("'", " ")
         curs.execute(sql_.INSERT_INTO_PRODUCT.format(product_id=prod.product_id, url=prod.url, prod_name=prod_name,
-                                                     rating=prod.rating, nb_reviews=prod.nb_reviews, part_no=prod.part_no,
-                                                     brand_id=brand_id, discount_price=prod.discount_price,
-                                                     out_of_stock=prod.out_of_stock, inventory_status=prod.inventory_status,
-                                                     currency=prod.currency, price=prod.price))
+                                                     rating=prod.rating, nb_reviews=prod.nb_reviews,
+                                                     part_no=prod.part_no, brand_id=brand_id,
+                                                     discount_price=prod.discount_price, out_of_stock=prod.out_of_stock,
+                                                     inventory_status=prod.inventory_status, currency=prod.currency,
+                                                     price=prod.price))
     except pymysql.err.Error as e:
         logging.info(f"""The product {str(prod)} has not been inserted into DB. Cause {e}""")
 

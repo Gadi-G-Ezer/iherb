@@ -63,12 +63,12 @@ This second request extracts all the information of the sports category (The DEF
 To specify the search parameters for the Twitter API request, update the `conf.json` file with the desired values for the following properties:
 
 ```json
-"TWITTER_REQUEST_PARAMETERS": {
+{"TWITTER_REQUEST_PARAMETERS": {
   "LATITUDE": "32.109333",
   "LONGITUDE": "34.855499",
   "RESULT_TYPE": "recent",
   "RADIUS": "500km",
-  "MAX_TWEETS" : 100
+  "MAX_TWEETS" : 100}
 }
 ```
 The meaning of each parameter is as follows:
@@ -137,28 +137,28 @@ Below is an overview of each table, its columns, and their data types.
 
 ### Table: `product`
 
-| Column             | Data Type       | Description                                       |
-|--------------------|-----------------|---------------------------------------------------|
-| id                 | int             | Product's unique ID.                              |
-| iherb_product_id   | int             | iHerb's internal product ID.                      |
-| url                | varchar(500)    | Product's URL on iHerb.                           |
-| name               | varchar(500)    | Product's name.                                   |
-| rating             | float           | Product's average rating.                         |
-| number_reviews     | int             | Number of reviews for the product.               |
-| part_no            | varchar(255)    | Product's part number.                            |
-| brand_id           | int             | Foreign key referencing the `brands` table.      |
-| discount_price     | float           | Product's discounted price.                       |
-| out_of_stock       | tinyint(1)      | Product's out of stock status (0 or 1).          |
-| inventory_status_id| varchar(50)     | Foreign key referencing the `inventory_status` table. |
-| currency           | varchar(255)    | Product's price currency.                         |
-| price              | float           | Product's original price.                         |
+| Column              | Data Type    | Description                                           |
+|---------------------|--------------|-------------------------------------------------------|
+| id                  | int          | Product's unique ID.                                  |
+| iherb_product_id    | int          | iHerb's internal product ID.                          |
+| url                 | varchar(500) | Product's URL on iHerb.                               |
+| name                | varchar(500) | Product's name.                                       |
+| rating              | float        | Product's average rating.                             |
+| number_reviews      | int          | Number of reviews for the product.                    |
+| part_no             | varchar(255) | Product's part number.                                |
+| brand_id            | int          | Foreign key referencing the `brands` table.           |
+| discount_price      | float        | Product's discounted price.                           |
+| out_of_stock        | tinyint(1)   | Product's out of stock status (0 or 1).               |
+| inventory_status_id | varchar(50)  | Foreign key referencing the `inventory_status` table. |
+| currency            | varchar(255) | Product's price currency.                             |
+| price               | float        | Product's original price.                             |
 
 ### Table: `product_category`
 
-| Column      | Data Type | Description                                         |
-|-------------|-----------|-----------------------------------------------------|
-| product_id  | int       | Foreign key referencing the `product` table.       |
-| category_id | int       | Foreign key referencing the `category` table.      |
+| Column      | Data Type | Description                                   |
+|-------------|-----------|-----------------------------------------------|
+| product_id  | int       | Foreign key referencing the `product` table.  |
+| category_id | int       | Foreign key referencing the `category` table. |
 
 ## Authors
 Gadi and Samuel, Data Science students in ITC

@@ -76,6 +76,7 @@ def get_parameters_for_scrapping():
 
         This function does not raise any exception.
     """
+    global config
     parser = argparse.ArgumentParser(description='Take a query')
     parser.add_argument('-c', '--category', type=str, metavar='', required=True, choices=config.CATEGORIES,
                         help=f'Choose category from the following list:\n\n{config.CATEGORIES}')
@@ -102,6 +103,7 @@ def pause_program(pause_time=config.TIME_SLEEP):
     Returns:
         None
     """
+    global config
     print(f"We reached the maximum number of requests.")
     print(f"Pausing for {config.TIME_SLEEP} seconds before to continue the requests on Twitter API...")
     time.sleep(pause_time)
@@ -124,6 +126,7 @@ def run_requests_on_db_and_api():
     Note: The function assumes that the 'connection', 'sql', and 'twitter_api' objects
     have been properly initialized outside the function.
     """
+    global config
     sql.insert_categories_into_db(req.products)
     sql.insert_brands_into_db(req.products)
     sql.insert_inventory_status_into_db(req.products)
@@ -167,7 +170,7 @@ def create_product_list(page_list):
 if __name__ == '__main__':
     args, limit = get_parameters_for_scrapping()
 
-    # Create an object Request_iherb
+    # Create an object of RequestIherb
     req = requestiherb.RequestIherb(config.URL + args.category, limit)
     print(f"This request contains {min(limit, len(req.url_list))} pages of products")
 
