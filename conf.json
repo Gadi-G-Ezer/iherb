@@ -7,7 +7,7 @@
   "DATABASE": {
     "HOST": "localhost",
     "USER": "root",
-    "PASSWORD": "root",
+    "PASSWORD": "1234567",
     "DB": "iherb",
     "CHARSET": "utf8mb4",
     "CURSORCLASS": "pymysql.cursors.DictCursor"
@@ -23,7 +23,7 @@
   },
   "TIME_SLEEP": 900,
   "DB_NAME" : "iherb",
-  "DEFAULT_LIMIT" : 3,
+  "DEFAULT_LIMIT" : 1,
   "CATEGORIES" : ["sports","supplements","bath-personal-care","beauty","grocery","healthy-home","baby-kids","pets"],
   "LOG_FILENAME": "iherb-scraping.log",
   "LOG_FORMAT": "%(asctime)s:%(levelname)s:%(message)s",

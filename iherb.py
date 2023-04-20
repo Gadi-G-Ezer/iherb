@@ -2,38 +2,48 @@ import argparse
 import json
 import logging
 import time
-
-import pymysql
 from fake_useragent import UserAgent
-from pymysql.cursors import DictCursor
 
 import requestiherb
 import sql
 import twitter_api
 
-# Import all the Global variables from the configuration file
-with open('conf.json', 'r') as f:
-    config = json.load(f)
 
-PARSER_TYPE = config["PARSER_TYPE"]
-UA = UserAgent(browsers=config['BROWSERS'])
-URL = config["URL"]
-RESULTS_PER_PAGE = config["RESULTS_PER_PAGE"]
-LOGGING_LEVEL = config["LOGGING_LEVEL"]
-logging.basicConfig(filename=config["LOG_FILENAME"], level=logging.getLevelName(LOGGING_LEVEL),
-                    format=config["LOG_FORMAT"])
-connection = pymysql.connect(
-    host=config['DATABASE']['HOST'],
-    user=config['DATABASE']['USER'],
-    password=config['DATABASE']['PASSWORD'],
-    db=config['DATABASE']['DB'],
-    charset=config['DATABASE']['CHARSET'],
-    cursorclass=pymysql.cursors.DictCursor
-)
-DB_NAME = config["DB_NAME"]
-CATEGORIES = config["CATEGORIES"]
-DEFAULT_LIMIT = config["DEFAULT_LIMIT"]
-TIME_SLEEP = config["TIME_SLEEP"]
+# Import all the Global variables from the configuration file
+class Configuration:
+    """
+    A class that loads configuration data from a JSON file and creates attributes for each key-value pair.
+
+    Parameters:
+    -----------
+    json_file : str
+        The path to the JSON file containing configuration data.
+
+    Attributes:
+    -----------
+    conf : dict
+        A dictionary containing the configuration data from the JSON file.
+    """
+    def __init__(self, json_file):
+        """
+        Loads configuration data from a JSON file and creates attributes for each key-value pair.
+
+        Parameters:
+        -----------
+        json_file : str
+            The path to the JSON file containing configuration data.
+        """
+        with open(json_file, 'r') as f:
+            self.conf = json.load(f)
+        for key, value in self.conf.items():
+            setattr(self, key, value)
+
+
+config = Configuration('conf.json')
+
+UA = UserAgent(browsers=config.BROWSERS)
+logging.basicConfig(filename=config.LOG_FILENAME, level=logging.getLevelName(config.LOGGING_LEVEL),
+                    format=config.LOG_FORMAT)
 
 
 def get_parameters_for_scrapping():
@@ -67,18 +77,18 @@ def get_parameters_for_scrapping():
         This function does not raise any exception.
     """
     parser = argparse.ArgumentParser(description='Take a query')
-    parser.add_argument('-c', '--category', type=str, metavar='', required=True, choices=config["CATEGORIES"],
-                        help=f'Choose category from the following list:\n\n{config["CATEGORIES"]}')
+    parser.add_argument('-c', '--category', type=str, metavar='', required=True, choices=config.CATEGORIES,
+                        help=f'Choose category from the following list:\n\n{config.CATEGORIES}')
     parser.add_argument('-l', '--limit', type=int, metavar='', help="(optional) number of results")
     arguments = parser.parse_args()
     if arguments.limit is None:
-        lim = DEFAULT_LIMIT
+        lim = config.DEFAULT_LIMIT
     else:
         lim = arguments.limit
     return arguments, lim
 
 
-def pause_program(pause_time=TIME_SLEEP):
+def pause_program(pause_time=config.TIME_SLEEP):
     """
     Pauses the program for a specified duration.
 
@@ -93,7 +103,7 @@ def pause_program(pause_time=TIME_SLEEP):
         None
     """
     print(f"We reached the maximum number of requests.")
-    print(f"Pausing for {TIME_SLEEP} seconds before to continue the requests on Twitter API...")
+    print(f"Pausing for {config.TIME_SLEEP} seconds before to continue the requests on Twitter API...")
     time.sleep(pause_time)
     print("Done pausing!")
 
@@ -114,26 +124,22 @@ def run_requests_on_db_and_api():
     Note: The function assumes that the 'connection', 'sql', and 'twitter_api' objects
     have been properly initialized outside the function.
     """
-    with connection.cursor() as cursor:
-        cursor.execute(f'USE {DB_NAME}')
-        sql.insert_categories_into_db(req.products, cursor)
-        sql.insert_brands_into_db(req.products, cursor)
-        sql.insert_inventory_status_into_db(req.products, cursor)
-        sql.insert_product_into_db(req.products, cursor)
-        brands = sql.get_brands_names(req.products, cursor)
-        for index, brand in enumerate(brands):
-            continue_requests = True
-            while continue_requests:
-                try:
-                    brands[index]['number_of_tweets'] = twitter_api.get_number_of_tweets_async(
-                        query=brands[index]["name"])
-                    print("Getting tweets request number ", index, " out of ", len(brands) - 1)
-                    continue_requests = False
-                except ValueError as err:
-                    logging.info(err)
-                    pause_program(pause_time=TIME_SLEEP)
-        sql.update_number_tweets(brands, cursor)
-        connection.commit()
+    sql.insert_categories_into_db(req.products)
+    sql.insert_brands_into_db(req.products)
+    sql.insert_inventory_status_into_db(req.products)
+    sql.insert_product_into_db(req.products)
+    brands = sql.get_brands_names(req.products)
+    for index, brand in enumerate(brands):
+        continue_requests = True
+        while continue_requests:
+            try:
+                brands[index]['number_of_tweets'] = twitter_api.get_number_of_tweets_async(query=brands[index]["name"])
+                print("Getting tweets request number ", index, " out of ", len(brands) - 1)
+                continue_requests = False
+            except ValueError as err:
+                logging.info(err)
+                pause_program(pause_time=config.TIME_SLEEP)
+        sql.update_number_tweets(brands)
 
 
 def create_product_list(page_list):
@@ -162,7 +168,7 @@ if __name__ == '__main__':
     args, limit = get_parameters_for_scrapping()
 
     # Create an object Request_iherb
-    req = requestiherb.RequestIherb(URL + args.category, limit)
+    req = requestiherb.RequestIherb(config.URL + args.category, limit)
     print(f"This request contains {min(limit, len(req.url_list))} pages of products")
 
     # Get the html of all the pages obtained with the request
