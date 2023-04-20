@@ -6,6 +6,10 @@ This scraper uses the requests, grequests, and BeautifulSoup libraries to extrac
 It also uses Twitter API to get the number of tweets we have for the product brand.
 We will use this information for a data mining project to make statistics on it. 
 
+Please note that due to Twitter's API rate limiting, the program's execution time may exceed one hour. 
+This is because Twitter imposes constraints on the number of requests that can be made per hour. Consequently, each request 
+to the Twitter API takes around 4.5 seconds to execute.
+
 ## Features
 The iHerb Web Scraper is capable of the following features:
 
@@ -27,6 +31,8 @@ The iHerb Web Scraper is capable of the following features:
 - Extracting the number of tweets of the product's brand using Twitter API V1.1
 
 ## Usage
+To run the program, execute the iherb.py file. This file serves as the main entry point and executes all other necessary files and functions.
+
 To use the iHerb Web Scraper, you need to call the program with the following arguments:
 - -c [CATEGORY] => The category argument is mandatory
 - -l [NUMBER OF PAGE TO SCRAPE] => The number of page argument is optional
@@ -50,6 +56,28 @@ This requests scrapes the 10 first pages of the iherb website for the category '
 ./iherb.py -c sports
 ```
 This second request extracts all the information of the sports category (The DEFAULT_LIMIT of page to scrape is in a separate conf file)
+
+
+## Setting Twitter Request Parameters
+
+To specify the search parameters for the Twitter API request, update the `conf.json` file with the desired values for the following properties:
+
+```json
+"TWITTER_REQUEST_PARAMETERS": {
+  "LATITUDE": "32.109333",
+  "LONGITUDE": "34.855499",
+  "RESULT_TYPE": "recent",
+  "RADIUS": "500km",
+  "MAX_TWEETS" : 100
+}
+```
+The meaning of each parameter is as follows:
+
+* LATITUDE: The latitude coordinate of the search location. 
+* LONGITUDE: The longitude coordinate of the search location. 
+* RESULT_TYPE: The type of results to be returned. Possible values are "mixed", "recent", or "popular". 
+* RADIUS: The search radius around the specified location, in kilometers. 
+* MAX_TWEETS: The maximum number of tweets to be returned per request.
 
 
 ## Installation
