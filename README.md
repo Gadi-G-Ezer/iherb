@@ -6,9 +6,8 @@ This scraper uses the requests, grequests, and BeautifulSoup libraries to extrac
 It also uses Twitter API to get the number of tweets we have for the product brand.
 We will use this information for a data mining project to make statistics on it. 
 
-Please note that due to Twitter's API rate limiting, the program's execution time may exceed one hour. 
-This is because Twitter imposes constraints on the number of requests that can be made per hour. Consequently, each request 
-to the Twitter API takes around 4.5 seconds to execute.
+Kindly be informed that the program's runtime may exceed one hour due to Twitter's API rate limiting. This is because 
+Twitter enforces limitations on the number of requests that can be issued, necessitating a pause before continuing.
 
 ## Features
 The iHerb Web Scraper is capable of the following features:
@@ -63,7 +62,8 @@ This second request extracts all the information of the sports category (The DEF
 To specify the search parameters for the Twitter API request, update the `conf.json` file with the desired values for the following properties:
 
 ```json
-{"TWITTER_REQUEST_PARAMETERS": {
+{
+"TWITTER_REQUEST_PARAMETERS": {
   "LATITUDE": "32.109333",
   "LONGITUDE": "34.855499",
   "RESULT_TYPE": "recent",
