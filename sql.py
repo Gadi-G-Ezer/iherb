@@ -2,7 +2,6 @@ import logging
 import pymysql.cursors
 import json
 
-
 INSERT_CATEGORY = "INSERT INTO CATEGORY (category,description) VALUES (\"{cat}\",\"\");"
 INSERT_BRAND = "INSERT INTO BRANDS (name) VALUES (\"{brand}\");"
 INSERT_STATUS = "INSERT INTO INVENTORY_STATUS (state) VALUES (\"{status}\");"
@@ -13,10 +12,12 @@ INSERT_INTO_PRODUCT = "INSERT INTO `product` (`iherb_product_id`, `url`, `name`,
                       "`brand_id`, `discount_price`, `out_of_stock`, `inventory_status_id`, `currency`, `price`) " \
                       "VALUES ({product_id}, '{url}', '{prod_name}', {rating}, {nb_reviews},'{part_no}',{brand_id}," \
                       "{discount_price}, {out_of_stock},{inventory_status},'{currency}', {price});"
-UPDATE_PRODUCT = "UPDATE product SET number_reviews ={nb_reviews}, rating ={rating} WHERE iherb_product_id = {product_id};"
+UPDATE_PRODUCT = "UPDATE product SET number_reviews ={nb_reviews}, rating ={rating} WHERE iherb_product_id = {" \
+                 "product_id};"
 SELECT_CATEGORY_ID = "SELECT id FROM category WHERE category.category='{category}'"
 SELECT_PRODUCT_ID_USING_IHERB_ID = "SELECT id FROM product WHERE product.iherb_product_id='{product_id}'"
-INSERT_PRODUCT_CATEGORY = "INSERT INTO `product_category` (`product_id`, `category_id`) VALUES ({product_id},{category_id})"
+INSERT_PRODUCT_CATEGORY = "INSERT INTO `product_category` (`product_id`, `category_id`) VALUES ({product_id}," \
+                          "{category_id})"
 UPDATE_BRAND_TWEETS_QTY = "UPDATE brands SET number_of_tweets ={tweets} WHERE id={brand_id};"
 SELECT_BRANDS_FROM_REQ = "SELECT * from brands where name in ({brands});"
 
@@ -66,6 +67,7 @@ def connect_to_pymysql(func):
 
         This decorator ensures that a new connection to the database is created every time a function is decorated.
     """
+
     def wrapper(*args, **kwargs):
         # get parameters from configurations file
         with open('conf.json', 'r') as f:
@@ -89,6 +91,7 @@ def connect_to_pymysql(func):
         curs.close()
         connection.close()
         return result
+
     return wrapper
 
 
@@ -180,11 +183,11 @@ def create_new_product(curs, prod):
         brand_id = result[0]['id']
         prod_name = prod.name.replace("'", " ")
         curs.execute(INSERT_INTO_PRODUCT.format(product_id=prod.product_id, url=prod.url, prod_name=prod_name,
-                                                     rating=prod.rating, nb_reviews=prod.nb_reviews,
-                                                     part_no=prod.part_no, brand_id=brand_id,
-                                                     discount_price=prod.discount_price, out_of_stock=prod.out_of_stock,
-                                                     inventory_status=prod.inventory_status, currency=prod.currency,
-                                                     price=prod.price))
+                                                rating=prod.rating, nb_reviews=prod.nb_reviews,
+                                                part_no=prod.part_no, brand_id=brand_id,
+                                                discount_price=prod.discount_price, out_of_stock=prod.out_of_stock,
+                                                inventory_status=prod.inventory_status, currency=prod.currency,
+                                                price=prod.price))
     except pymysql.err.Error as e:
         logging.info(f"""The product {str(prod)} has not been inserted into DB. Cause {e}""")
 
