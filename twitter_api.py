@@ -27,9 +27,7 @@ def get_oauth1_authentication():
         OAuth1: An instance of the OAuth1 object with the necessary credentials.
     """
     oauth = OAuth1(client_key=CONSUMER_KEY,
-                   client_secret=CONSUMER_SECRET,
-                   resource_owner_key=ACCESS_TOKEN,
-                   resource_owner_secret=ACCESS_TOKEN_SECRET)
+                   client_secret=CONSUMER_SECRET)
     return oauth
 
 
