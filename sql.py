@@ -3,23 +3,22 @@ import pymysql.cursors
 import json
 
 
-class SQLQueries:
-    """A class that loads SQL queries from a JSON file and sets them as attributes.
-
-    Args:
-        json_file (str): The file path of the JSON file containing the SQL queries.
-
-    Attributes:
-        queries (dict): A dictionary containing the loaded SQL queries.
-    """
-    def __init__(self, json_file):
-        with open(json_file, 'r') as f:
-            self.queries = json.load(f)
-        for key, value in self.queries.items():
-            setattr(self, key, value)
-
-
-sql_ = SQLQueries('SQL_queries.json')
+INSERT_CATEGORY = "INSERT INTO CATEGORY (category,description) VALUES (\"{cat}\",\"\");"
+INSERT_BRAND = "INSERT INTO BRANDS (name) VALUES (\"{brand}\");"
+INSERT_STATUS = "INSERT INTO INVENTORY_STATUS (state) VALUES (\"{status}\");"
+COUNT_PRODUCT_WITH_IHERB_ID = "SELECT COUNT(*) AS NUM_RESULT FROM product WHERE product.iherb_product_id={product_id};"
+SELECT_BRAND_ID = "SELECT id FROM brands WHERE brands.name='{brand_name}'"
+SELECT_BRAND_WITH_NAME = "SELECT id FROM brands WHERE brands.name={brand_name}"
+INSERT_INTO_PRODUCT = "INSERT INTO `product` (`iherb_product_id`, `url`, `name`, `rating`,`number_reviews`,`part_no`," \
+                      "`brand_id`, `discount_price`, `out_of_stock`, `inventory_status_id`, `currency`, `price`) " \
+                      "VALUES ({product_id}, '{url}', '{prod_name}', {rating}, {nb_reviews},'{part_no}',{brand_id}," \
+                      "{discount_price}, {out_of_stock},{inventory_status},'{currency}', {price});"
+UPDATE_PRODUCT = "UPDATE product SET number_reviews ={nb_reviews}, rating ={rating} WHERE iherb_product_id = {product_id};"
+SELECT_CATEGORY_ID = "SELECT id FROM category WHERE category.category='{category}'"
+SELECT_PRODUCT_ID_USING_IHERB_ID = "SELECT id FROM product WHERE product.iherb_product_id='{product_id}'"
+INSERT_PRODUCT_CATEGORY = "INSERT INTO `product_category` (`product_id`, `category_id`) VALUES ({product_id},{category_id})"
+UPDATE_BRAND_TWEETS_QTY = "UPDATE brands SET number_of_tweets ={tweets} WHERE id={brand_id};"
+SELECT_BRANDS_FROM_REQ = "SELECT * from brands where name in ({brands});"
 
 
 def connect_to_pymysql(func):
@@ -101,11 +100,10 @@ def insert_categories_into_db(curs, products):
     :param curs: curso object
     :return: None
     """
-    global sql_
     categories = {p.category for p in products}
     for cat in categories:
         try:
-            curs.execute(sql_.INSERT_CATEGORY.format(cat=cat))
+            curs.execute(INSERT_CATEGORY.format(cat=cat))
         except pymysql.err.IntegrityError as err:
             logging.info(err)
 
@@ -118,11 +116,10 @@ def insert_brands_into_db(curs, products):
     :param curs: curso object
     :return: None
     """
-    global sql_
     brands = {p.brand_name for p in products}
     for brand in brands:
         try:
-            curs.execute(sql_.INSERT_BRAND.format(brand=brand))
+            curs.execute(INSERT_BRAND.format(brand=brand))
         except pymysql.err.IntegrityError as err:
             logging.info(err)
 
@@ -135,11 +132,10 @@ def insert_inventory_status_into_db(curs, products):
     :param curs: curso object
     :return: None
     """
-    global sql_
     inventory_status = {p.inventory_status for p in products}
     for status in inventory_status:
         try:
-            curs.execute(sql_.INSERT_STATUS.format(status=status))
+            curs.execute(INSERT_STATUS.format(status=status))
         except pymysql.err.IntegrityError as err:
             logging.info(err)
 
@@ -152,9 +148,8 @@ def insert_product_into_db(curs, products):
     :param curs: curso object
     :return: None
     """
-    global sql_
     for prod in products:
-        curs.execute(sql_.SELECT_PRODUCT_ID_USING_IHERB_ID.format(product_id=prod.product_id))
+        curs.execute(SELECT_PRODUCT_ID_USING_IHERB_ID.format(product_id=prod.product_id))
         if curs.fetchone() is None:
             create_new_product(prod)
         else:
@@ -178,14 +173,13 @@ def create_new_product(curs, prod):
     Raises:
         pymysql.err.Error: If there is an error executing the SQL query.
     """
-    global sql_
     try:
         brand_name = '"' + prod.brand_name + '"'
-        curs.execute(sql_.SELECT_BRAND_WITH_NAME.format(brand_name=brand_name))
+        curs.execute(SELECT_BRAND_WITH_NAME.format(brand_name=brand_name))
         result = curs.fetchall()
         brand_id = result[0]['id']
         prod_name = prod.name.replace("'", " ")
-        curs.execute(sql_.INSERT_INTO_PRODUCT.format(product_id=prod.product_id, url=prod.url, prod_name=prod_name,
+        curs.execute(INSERT_INTO_PRODUCT.format(product_id=prod.product_id, url=prod.url, prod_name=prod_name,
                                                      rating=prod.rating, nb_reviews=prod.nb_reviews,
                                                      part_no=prod.part_no, brand_id=brand_id,
                                                      discount_price=prod.discount_price, out_of_stock=prod.out_of_stock,
@@ -210,13 +204,12 @@ def update_existing_product(curs, prod):
     Raises:
         pymysql.err.Error: If there is an error executing the SQL query.
     """
-    global sql_
     try:
         curs.execute(
-            sql_.UPDATE_PRODUCT.format(nb_reviews=prod.nb_reviews, rating=prod.rating, product_id=prod.product_id))
+            UPDATE_PRODUCT.format(nb_reviews=prod.nb_reviews, rating=prod.rating, product_id=prod.product_id))
     except pymysql.err.Error as e:
         logging.info(
-            f"""FAIL : {sql_.UPDATE_PRODUCT.format(nb_reviews=prod.nb_reviews, rating=prod.rating,
+            f"""FAIL : {UPDATE_PRODUCT.format(nb_reviews=prod.nb_reviews, rating=prod.rating,
                                               product_id=prod.product_id)} CAUSE : {e}""")
         print(f"UPDATE FAILED for {prod.product_id} !!!")
 
@@ -237,18 +230,17 @@ def populate_product_category(curs, prod):
     Raises:
         pymysql.err.Error: If there is an error executing the SQL query.
     """
-    global sql_
-    curs.execute(sql_.SELECT_CATEGORY_ID.format(category=prod.category))
+    curs.execute(SELECT_CATEGORY_ID.format(category=prod.category))
     result = curs.fetchall()
     category_id = result[0]['id']
-    curs.execute(sql_.SELECT_PRODUCT_ID_USING_IHERB_ID.format(product_id=prod.product_id))
+    curs.execute(SELECT_PRODUCT_ID_USING_IHERB_ID.format(product_id=prod.product_id))
     result = curs.fetchall()
     product_id = result[0]['id']
     try:
-        curs.execute(sql_.INSERT_PRODUCT_CATEGORY.format(product_id=product_id, category_id=category_id))
+        curs.execute(INSERT_PRODUCT_CATEGORY.format(product_id=product_id, category_id=category_id))
     except pymysql.err.Error as e:
         logging.info(
-            f"""FAIL : {sql_.INSERT_PRODUCT_CATEGORY.format(product_id=product_id, category_id=category_id)}
+            f"""FAIL : {INSERT_PRODUCT_CATEGORY.format(product_id=product_id, category_id=category_id)}
                         CAUSE = {e}""")
 
 
@@ -276,11 +268,10 @@ def get_brands_names(curs, products):
         # brands == [{'id': 1, 'name': 'Apple'}, {'id': 2, 'name': 'Samsung'}]
 
     """
-    global sql_
     brands_list = list(set([f'"{str(product.brand_name)}"' for product in products]))
     brands = ",".join(brands_list)
     try:
-        curs.execute(sql_.SELECT_BRANDS_FROM_REQ.format(brands=brands))
+        curs.execute(SELECT_BRANDS_FROM_REQ.format(brands=brands))
     except BaseException as error:
         print("ERROR : ", error)
         logging.error(f"Error: {error}")
@@ -309,12 +300,11 @@ def update_number_tweets(curs, brands):
         curs = conn.cursor()
         update_number_tweets(brands, curs)
     """
-    global sql_
     for brand in brands:
         id_ = brand['id']
         tweets_qty = brand['number_of_tweets']
         try:
-            curs.execute(sql_.UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_))
+            curs.execute(UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_))
         except pymysql.err.Error as e:
             logging.info(
-                f"""FAIL : {sql_.UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_)} CAUSE : {e}""")
+                f"""FAIL : {UPDATE_BRAND_TWEETS_QTY.format(tweets=tweets_qty, brand_id=id_)} CAUSE : {e}""")

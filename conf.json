@@ -12,14 +12,13 @@
     "CHARSET": "utf8mb4",
     "CURSORCLASS": "pymysql.cursors.DictCursor"
   },
-    "TWITTER_REQUEST_PARAMETERS": {
+  "TWITTER_REQUEST_PARAMETERS": {
     "LATITUDE": "32.109333",
     "LONGITUDE": "34.855499",
     "RESULT_TYPE": "recent",
     "RADIUS": "500km",
     "MAX_TWEETS" : 100,
     "REQUEST_ACCEPTED_CODE" : 200
-
   },
   "TIME_SLEEP": 900,
   "DB_NAME" : "iherb",
