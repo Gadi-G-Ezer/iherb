@@ -2,9 +2,9 @@ import logging
 import pymysql.cursors
 import json
 
-INSERT_CATEGORY = "INSERT INTO CATEGORY (category,description) VALUES (\"{cat}\",\"\");"
-INSERT_BRAND = "INSERT INTO BRANDS (name) VALUES (\"{brand}\");"
-INSERT_STATUS = "INSERT INTO INVENTORY_STATUS (state) VALUES (\"{status}\");"
+INSERT_CATEGORY = "INSERT INTO category (category,description) VALUES (\"{cat}\",\"\");"
+INSERT_BRAND = "INSERT INTO brands (name) VALUES (\"{brand}\");"
+INSERT_STATUS = "INSERT INTO inventory_status (state) VALUES (\"{status}\");"
 COUNT_PRODUCT_WITH_IHERB_ID = "SELECT COUNT(*) AS NUM_RESULT FROM product WHERE product.iherb_product_id={product_id};"
 SELECT_BRAND_ID = "SELECT id FROM brands WHERE brands.name='{brand_name}'"
 SELECT_BRAND_WITH_NAME = "SELECT id FROM brands WHERE brands.name={brand_name}"
@@ -78,7 +78,6 @@ def connect_to_pymysql(func):
             user=config['DATABASE']['USER'],
             password=config['DATABASE']['PASSWORD'],
             db=config['DATABASE']['DB'],
-            charset=config['DATABASE']['CHARSET'],
             cursorclass=pymysql.cursors.DictCursor
         )
         # create a cursor object from the connection
